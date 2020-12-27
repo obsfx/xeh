@@ -76,7 +76,7 @@
           (dump (string-downcase (join left " "))) (dump "  ")
           (dump (string-downcase (join right " "))) (dump "  ")
           (dump "|")
-          (dump (string-downcase (join (hex-list-to-str-list (slice buffer byte-pos 16)))))
+          (dump (join (hex-list-to-str-list (slice buffer byte-pos 16))))
           (dump "|")
           (newline)
           (dump-hex-row buffer (+ byte-pos 16))))
