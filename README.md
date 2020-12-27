@@ -1,14 +1,11 @@
 # xeh
 A command-line Canonical HEX+ASCII display tool written in ~100 lines of Common Lisp.
 
-![](https://raw.githubusercontent.com/obsfx/xeh/main/media/xeh.png)
-
+![](https://raw.githubusercontent.com/obsfx/xeh/main/xeh.png)
 
 #### Requirements
 
 - SBCL
-
-
 
 #### Building
 
