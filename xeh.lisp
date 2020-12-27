@@ -1,3 +1,7 @@
+;;; xeh
+;;; A command-line Canonical HEX+ASCII display tool written in ~100 lines of Common Lisp.
+;;; https://github.com/obsfx/xeh
+
 (defun dump (output) 
   (format t "~A" output))
 
@@ -21,7 +25,6 @@
   (let ((base-list (make-list len :initial-element "  ")))
     (loop for i from 0 to (- len 1)
           do (let* ((hex (nth (+ start i) l))
-                    (val (nth i base-list))
                     (placed-val (if hex hex "  ")))
                (setf (nth i base-list) placed-val)))
     (values base-list)))
@@ -69,138 +72,28 @@
              (left (subseq row 0 8))
              (right (subseq row 8 16)))
         (progn
-          (dump (get-row-address byte-pos)) (dump "  ")
-          (dump (join left " ")) (dump "  ")
-          (dump (join right " ")) (dump "  ")
+          (dump (string-downcase (get-row-address byte-pos))) (dump "  ")
+          (dump (string-downcase (join left " "))) (dump "  ")
+          (dump (string-downcase (join right " "))) (dump "  ")
           (dump "|")
-          (dump (join (hex-list-to-str-list (slice buffer byte-pos 16))))
+          (dump (string-downcase (join (hex-list-to-str-list (slice buffer byte-pos 16)))))
           (dump "|")
           (newline)
-          (dump-hex-row buffer (+ byte-pos 16))))))
+          (dump-hex-row buffer (+ byte-pos 16))))
+      (progn
+        (dump (string-downcase (get-row-address (length buffer))))
+        (newline))))
 
 (defparameter buffer nil)
-;; https://stackoverflow.com/a/20048719/13615958
-(defparameter file-path (nth 1 *posix-argv*))
-
-(if file-path 
-    (setf buffer (read-file-bytes file-path)))
-
-(if (not buffer)
-    (progn 
-      (format t "xeh: ~A: File couldn't found" file-path)
-      (quit)))
-
-(dump buffer)
-(newline)
-(setf buffer (format-single-char-hex-values buffer))
-
-(newline)
-
-(dump-hex-row buffer 0)
-(dump (get-row-address (length buffer)))
-;(dump (fixed-slice buffer 20 (length buffer)))
-
-;(loop for i from 0 to ( - (length buffer) 1)
-;      do (let ((hex (nth i buffer)))
-;           (dump hex)))
-
-;(loop for x in buffer
-;      do (dump x))
-; (format nil "~&~S~&" *posix-argv*)
-
-;(defun read-to-buffer (file-path)
-;  (with-open-file 
-;      (stream 
-;        file-path
-;        :element-type '(unsigned-byte 8)
-;        :if-does-not-exist nil)
-;    (defun read-stream ()
-;      (progn
-;        (setf data (read-byte stream nil nil))
-;        (if data
-;            (progn
-;              (append-to-buffer (write-to-string data :base 16))
-;              (read-stream)))))
-;    (if stream 
-;        (read-stream)
-;        (progn 
-;          (p "file couldn't found") 
-;          (nl)))))
-;
-;(defun join (str-list)
-;  (reduce 
-;    #'(lambda (a b)
-;        (format nil "~A ~A" a b))
-;    (mapcar 
-;      #'(lambda (str)
-;          (format nil "~A~A"
-;                  (sn "0" (- 2 (length str)))
-;                  str))
-;      str-list)))
-;
-;
-;
-;(defun dump () 
-;  (let* ((current-row (floor byte-counter 16))
-;         (row-buffer (slice buffer (* current-row 16) (+ (* current-row 16) 16)))
-;         (row-l (slice row-buffer 0 8))
-;         (row-r (slice row-buffer 8 16)))
-;    (if (< byte-counter (length buffer))
-;        (progn
-;          (dump-row-address byte-counter)
-;          (p (join row-l))
-;          (p "  ")
-;          (if row-r (p (join row-r)))
-;          (if (< (length row-buffer) 16)
-;              (progn
-;                (pn "  " (- 16 (length row-buffer)))
-;                (pn " " (- 15 (length row-buffer)))
-;                (if (< (- 16 (length row-buffer)) 2)
-;                    (p " "))))
-;          (p "   |")
-;          (p (buffer-to-string row-buffer))
-;          (p "|")
-;          (nl)
-;          (setf byte-counter (+ byte-counter 16))
-;          (dump)))))
-;
-;(read-to-buffer "./testfile")
-;(nl)
-;
-;(mapcar #'(lambda (byte) 
-;            (p (length byte))) 
-;        buffer)
-;(nl)
-;(p (subseq buffer 0 1))
-;(nl)
-;(dump-row-address 16)
-;(nl)
-;(dump)
-
-;(if (not (boundp 'buffer)) (p "var") (p "yok"))
-
-;(with-open-file 
-;    (stream 
-;      "./testfile" 
-;        :element-type '(unsigned-byte 8) 
-;        :if-does-not-exist nil)
-;  (defun through-stream () 
-;    (progn 
-;      (setf data (read-byte stream nil nil))
-;      (if data 
-;          (progn 
-;            (format t "~a~%" (write-to-string data :base 16))
-;            (format t "~a~%" (code-char data))
-;            (through-stream)))))
-;  (if stream 
-;      (through-stream)
-;      (format t "file couldn't found~%")))
-
-; (defparameter data 5)
-; (defun through-stream (data)
-;   (if (> data 0)
-;       (format t "~a " data)
-;       (progn (setf data (- data 1))
-;        (through-stream data))))
-; 
-; (through-stream data)
+(defparameter file-path nil)
+(defun main()
+    (progn
+      (setf file-path (second *posix-argv*))
+      (if file-path 
+          (setf buffer (read-file-bytes file-path)))
+      (if (not buffer)
+          (progn 
+            (format t "xeh: ~A: File couldn't found" file-path)
+            (quit)))
+      (setf buffer (format-single-char-hex-values buffer))
+      (dump-hex-row buffer 0)))
